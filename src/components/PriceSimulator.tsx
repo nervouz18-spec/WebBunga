@@ -529,11 +529,11 @@ export function PriceSimulator({
             <p className="text-sm text-[#4D544F] leading-relaxed">{t.subheading}</p>
           </div>
 
-          <div className="inline-flex items-center gap-1 p-1 bg-[#EAE6DF] rounded-sm w-fit shrink-0">
+          <div className="grid grid-cols-1 gap-1 p-1 bg-[#EAE6DF] rounded-sm w-full sm:inline-flex sm:w-fit sm:shrink-0">
             <button
               type="button"
               onClick={() => setBuilderMode('stems')}
-              className={`px-4 py-2 text-xs font-medium rounded-sm transition-colors cursor-pointer ${
+              className={`px-4 py-2.5 sm:py-2 text-xs font-medium rounded-sm transition-colors cursor-pointer ${
                 builderMode === 'stems'
                   ? 'bg-white text-[#A35047] shadow-xs'
                   : 'text-[#5C615D] hover:text-[#1C211E]'
@@ -544,7 +544,7 @@ export function PriceSimulator({
             <button
               type="button"
               onClick={() => setBuilderMode('event-pieces')}
-              className={`px-4 py-2 text-xs font-medium rounded-sm transition-colors cursor-pointer ${
+              className={`px-4 py-2.5 sm:py-2 text-xs font-medium rounded-sm transition-colors cursor-pointer ${
                 builderMode === 'event-pieces'
                   ? 'bg-white text-[#A35047] shadow-xs'
                   : 'text-[#5C615D] hover:text-[#1C211E]'
@@ -1040,7 +1040,7 @@ export function PriceSimulator({
                       return (
                         <div
                           key={stem.id}
-                          className="py-3.5 flex items-center justify-between gap-4"
+                          className="py-3.5 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                         >
                           <div className="min-w-0">
                             <div className="text-sm font-medium text-[#1C211E]">{stemName}</div>
@@ -1054,7 +1054,7 @@ export function PriceSimulator({
                             </div>
                           </div>
 
-                          <div className="inline-flex items-center border border-[#DCD7CE] rounded-sm bg-[#F9F8F6] shrink-0">
+                          <div className="inline-flex items-center border border-[#DCD7CE] rounded-sm bg-[#F9F8F6] shrink-0 self-end sm:self-auto">
                             <button
                               type="button"
                               onClick={() => updateStem(stem.id, -1)}

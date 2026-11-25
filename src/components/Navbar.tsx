@@ -112,15 +112,15 @@ export function Navbar({
     <header ref={navRef} className="relative z-40">
       {/* Slim Brand & Bag Top Strip */}
       <div className="bg-[#FAF9F6] border-b border-[#E5E1D8]">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-8">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between gap-3 sm:gap-8">
           <a
             href="#top"
-            className="font-serif text-2xl tracking-tight font-medium text-[#1C211E] whitespace-nowrap shrink-0"
+            className="font-serif text-xl sm:text-2xl tracking-tight font-medium text-[#1C211E] truncate min-w-0"
           >
             {siteConfig.brandName}
           </a>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               type="button"
               onClick={onOpenCrm}
@@ -144,12 +144,12 @@ export function Navbar({
             <button
               type="button"
               onClick={onOpenCart}
-              className="inline-flex items-center gap-2 px-4 py-2 text-xs font-medium text-white bg-[#2D3B32] hover:bg-[#1E2822] transition-colors duration-150 rounded-sm whitespace-nowrap shrink-0 min-h-[36px] cursor-pointer"
+              aria-label={`${t.bag} (${cartCount})`}
+              className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 text-xs font-medium text-white bg-[#2D3B32] hover:bg-[#1E2822] transition-colors duration-150 rounded-sm whitespace-nowrap shrink-0 min-h-[44px] sm:min-h-[36px] cursor-pointer"
             >
-              <ShoppingBag className="w-3.5 h-3.5 stroke-[1.75]" aria-hidden="true" />
-              <span className="tabular-nums">
-                {t.bag} ({cartCount})
-              </span>
+              <ShoppingBag className="w-4 h-4 sm:w-3.5 sm:h-3.5 stroke-[1.75]" aria-hidden="true" />
+              <span className="hidden sm:inline">{t.bag}</span>
+              <span className="tabular-nums">({cartCount})</span>
             </button>
 
             <button
@@ -414,7 +414,7 @@ export function Navbar({
                 onOpenCrm();
                 setMobileMenuOpen(false);
               }}
-              className="inline-flex items-center gap-1.5 text-left px-3 py-2 rounded-sm bg-[#2D3B32] font-medium cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-left px-3 py-3 col-span-2 rounded-sm bg-[#2D3B32] font-medium cursor-pointer"
             >
               {!isCrmAuthenticated && <Lock className="w-3.5 h-3.5" aria-hidden="true" />}
               <span>

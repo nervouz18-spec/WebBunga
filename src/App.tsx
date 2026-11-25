@@ -617,10 +617,10 @@ export default function App() {
               <p className="text-base text-[#4D544F] leading-relaxed mb-8 max-w-lg">
                 {t.hero.subcopy}
               </p>
-              <div className="flex flex-wrap items-center gap-5">
+              <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
                 <a
                   href="#collections"
-                  className="inline-flex items-center gap-2.5 px-6 py-3 text-sm font-medium text-white bg-[#A35047] hover:bg-[#8E433B] transition-colors duration-150 rounded-sm whitespace-nowrap min-h-[44px]"
+                  className="inline-flex items-center gap-2.5 px-5 sm:px-6 py-3 text-sm font-medium text-white bg-[#A35047] hover:bg-[#8E433B] transition-colors duration-150 rounded-sm whitespace-nowrap min-h-[44px]"
                 >
                   <span>{t.hero.primaryCta}</span>
                   <ArrowRight className="w-4 h-4" aria-hidden="true" />
@@ -642,7 +642,7 @@ export default function App() {
             </div>
 
             <div className="lg:col-span-7">
-              <div className="aspect-[16/10] lg:aspect-auto lg:h-full min-h-[340px] bg-[#EFECE6] border border-[#E5E1D8] rounded-sm overflow-hidden">
+              <div className="aspect-[4/3] sm:aspect-[16/10] lg:aspect-auto lg:h-full min-h-[260px] sm:min-h-[340px] bg-[#EFECE6] border border-[#E5E1D8] rounded-sm overflow-hidden">
                 <ResilientImage
                   src={HERO_IMAGE}
                   alt="Sculptural seasonal arrangement with ivory garden roses and sweet peas in stoneware"
@@ -653,7 +653,7 @@ export default function App() {
             </div>
           </div>
 
-          <div className="mt-12 pt-8 border-t border-[#E5E1D8] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          <div className="mt-10 sm:mt-12 pt-8 border-t border-[#E5E1D8] grid grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 lg:gap-8">
             {t.hero.promises.map((promise) => (
               <div key={promise.index} className="space-y-1">
                 <div className="text-xs font-medium text-[#5C615D] tabular-nums">
@@ -699,7 +699,7 @@ export default function App() {
             <div
               role="tablist"
               aria-label="Floral categories"
-              className="flex flex-wrap items-center gap-1.5 p-1 bg-[#F2F0EC] rounded-sm w-fit mb-10"
+              className="no-scrollbar flex flex-nowrap items-center gap-1.5 p-1 bg-[#F2F0EC] rounded-sm w-full overflow-x-auto mb-8 sm:mb-10 lg:w-fit lg:flex-wrap lg:overflow-visible"
             >
               {categoryTabs.map((tab) => {
                 const active = tab.id === activeCategory;
@@ -737,7 +737,7 @@ export default function App() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                 {filteredProducts.map((product) => {
                   const name = language === 'en' ? product.nameEn : product.nameId;
                   const categoryLabel =
@@ -828,7 +828,7 @@ export default function App() {
                 </p>
               </div>
 
-              <div className="inline-flex items-center gap-1 p-1 bg-[#F2F0EC] rounded-sm w-fit shrink-0">
+              <div className="grid grid-cols-1 gap-1 p-1 bg-[#F2F0EC] rounded-sm w-full sm:inline-flex sm:w-fit sm:shrink-0">
                 <button
                   type="button"
                   onClick={() => setSubscriptionSpace('home')}
@@ -919,7 +919,7 @@ export default function App() {
                     {t.services.description}
                   </p>
 
-                  <div className="flex flex-wrap gap-1.5 p-1 bg-[#EAE6DF] rounded-sm mb-4">
+                  <div className="no-scrollbar flex flex-nowrap gap-1.5 p-1 bg-[#EAE6DF] rounded-sm mb-4 overflow-x-auto lg:flex-wrap lg:overflow-visible">
                     {t.services.tabs.map((tab) => {
                       const active = tab.id === activeServiceTab;
                       return (

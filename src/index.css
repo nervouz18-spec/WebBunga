@@ -13,8 +13,32 @@
     background-color: #F9F8F6;
   }
 
+  body {
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   h1, h2, h3, .font-display {
     font-family: var(--font-serif);
+  }
+}
+
+/* Sembunyikan scrollbar pada tab horizontal tanpa menghilangkan fungsi scroll */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* iOS/Zoom aman: input di bawah 16px membuat Safari otomatis zoom saat fokus */
+@media (max-width: 640px) {
+  input:not([type='checkbox']):not([type='radio']):not([type='file']),
+  select,
+  textarea {
+    font-size: 16px !important;
   }
 }
 

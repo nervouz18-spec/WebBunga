@@ -85,25 +85,33 @@ export function ProductDetailModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[#1C211E]/55 backdrop-blur-xs p-4 sm:p-6 overflow-y-auto"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[#1C211E]/55 backdrop-blur-xs p-3 sm:p-6 overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-labelledby="pdp-title"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-4xl bg-[#F9F8F6] border border-[#E5E1D8] rounded-sm overflow-hidden grid grid-cols-1 lg:grid-cols-12 my-auto"
+        className="relative w-full max-w-4xl max-h-[calc(100dvh-1.5rem)] sm:max-h-[calc(100vh-3rem)] bg-[#F9F8F6] border border-[#E5E1D8] rounded-sm overflow-y-auto lg:overflow-hidden grid grid-cols-1 lg:grid-cols-12 my-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Left: Product Image & Botanical Notes */}
         <div className="lg:col-span-6 bg-[#EFECE6] flex flex-col">
-          <div className="aspect-[4/3] w-full overflow-hidden bg-[#E8E4DC]">
+          <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#E8E4DC]">
             <ResilientImage
               src={product.image}
               alt={product.imageAlt}
               fallbackTitle={name}
               className="w-full h-full object-cover"
             />
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={t.close}
+              className="lg:hidden absolute top-3 right-3 w-10 h-10 inline-flex items-center justify-center bg-white/90 text-[#1C211E] rounded-sm shadow-xs cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
           <div className="p-6 space-y-4 border-t border-[#E5E1D8] flex-1">
