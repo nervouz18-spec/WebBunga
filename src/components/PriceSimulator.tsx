@@ -135,15 +135,13 @@ export function PriceSimulator({
     publishedCalculator.customSymbol.trim() === 'S$';
 
   // Event & Wedding Pieces mode (synced directly with CRM Calculator Publisher)
-  const [pieceCounts, setPieceCounts] = useState<Record<string, number>>({
-    'piece-bridal-bouquet': 1,
-    'piece-centerpiece': 4,
-  });
+  // Start empty so every visitor begins from a clean slate; presets are opt-in via buttons.
+  const [pieceCounts, setPieceCounts] = useState<Record<string, number>>({});
   const [copiedEstimate, setCopiedEstimate] = useState(false);
 
   // Custom Stem Builder mode
   const [selectedFormatId, setSelectedFormatId] = useState<string>('bloom-box');
-  const [stemCounts, setStemCounts] = useState<Record<string, number>>(PRESETS.sunset.stems);
+  const [stemCounts, setStemCounts] = useState<Record<string, number>>({});
   const [selectedPaletteId, setSelectedPaletteId] = useState<string>('sunset-reverie');
   const [selectedAddons, setSelectedAddons] = useState<string[]>(['silk-ribbon']);
   const [deliveryDate, setDeliveryDate] = useState<string>(getTomorrow);
