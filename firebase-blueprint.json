@@ -1,0 +1,469 @@
+{
+  "entities": {
+    "UserPublicProfile": {
+      "title": "UserPublicProfile",
+      "description": "Minimal non-PII public identity record for an authenticated studio user.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "role": {
+          "type": "string",
+          "enum": ["florist"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "displayName", "role", "createdAt", "updatedAt"]
+    },
+    "UserPrivateInfo": {
+      "title": "UserPrivateInfo",
+      "description": "Isolated PII profile record readable and writable only by the owning user.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 180
+        },
+        "studioName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["uid", "email", "studioName", "updatedAt"]
+    },
+    "StudioWorkspace": {
+      "title": "StudioWorkspace",
+      "description": "Studio workspace metadata and draft calculator configuration owned by a single florist user.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "studioName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "calculatorDraft": {
+          "type": "object"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["ownerId", "studioName", "calculatorDraft", "createdAt", "updatedAt"]
+    },
+    "CrmLeadDoc": {
+      "title": "CrmLeadDoc",
+      "description": "Floral inquiry, estimate, proposal, and contract record inside a studio workspace.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "referenceCode": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 32
+        },
+        "source": {
+          "type": "string",
+          "enum": ["simulator", "service-form", "manual"]
+        },
+        "stage": {
+          "type": "string",
+          "enum": ["estimate", "lead", "proposal-sent", "contract-signed", "booked"]
+        },
+        "clientName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "clientEmail": {
+          "type": "string",
+          "maxLength": 180
+        },
+        "clientPhone": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "eventTitle": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "eventDate": {
+          "type": "string",
+          "minLength": 4,
+          "maxLength": 32
+        },
+        "venue": {
+          "type": "string",
+          "maxLength": 180
+        },
+        "palette": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "estimatedTotalSGD": {
+          "type": "number"
+        },
+        "depositPaidSGD": {
+          "type": "number"
+        },
+        "stemCounts": {
+          "type": "object"
+        },
+        "lineItems": {
+          "type": "array"
+        },
+        "studioNotes": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "contractSignedBy": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "contractSignedAt": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "referenceCode",
+        "source",
+        "stage",
+        "clientName",
+        "clientEmail",
+        "clientPhone",
+        "eventTitle",
+        "eventDate",
+        "venue",
+        "palette",
+        "estimatedTotalSGD",
+        "depositPaidSGD",
+        "stemCounts",
+        "lineItems",
+        "studioNotes",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "CrmOrderDoc": {
+      "title": "CrmOrderDoc",
+      "description": "Completed storefront floral order synced to a studio workspace.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "orderNumber": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 32
+        },
+        "currency": {
+          "type": "string",
+          "enum": ["SGD", "IDR", "USD"]
+        },
+        "customerName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "customerPhone": {
+          "type": "string",
+          "maxLength": 40
+        },
+        "customerEmail": {
+          "type": "string",
+          "maxLength": 180
+        },
+        "recipientName": {
+          "type": "string",
+          "maxLength": 120
+        },
+        "deliveryAddress": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "postalCode": {
+          "type": "string",
+          "maxLength": 20
+        },
+        "deliverySlot": {
+          "type": "string",
+          "maxLength": 60
+        },
+        "paymentMethod": {
+          "type": "string",
+          "enum": ["bank-transfer", "card", "whatsapp-concierge"]
+        },
+        "items": {
+          "type": "array"
+        },
+        "subtotalSGD": {
+          "type": "number"
+        },
+        "deliveryFeeSGD": {
+          "type": "number"
+        },
+        "totalSGD": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "ownerId",
+        "orderNumber",
+        "currency",
+        "customerName",
+        "customerPhone",
+        "customerEmail",
+        "recipientName",
+        "deliveryAddress",
+        "postalCode",
+        "deliverySlot",
+        "paymentMethod",
+        "items",
+        "subtotalSGD",
+        "deliveryFeeSGD",
+        "totalSGD",
+        "createdAt"
+      ]
+    },
+    "PublishedCalculatorDoc": {
+      "title": "PublishedCalculatorDoc",
+      "description": "Publicly readable non-PII floral estimator configuration published to the Storefront.",
+      "type": "object",
+      "properties": {
+        "ownerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "config": {
+          "type": "object"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": ["ownerId", "config", "updatedAt"]
+    },
+    "PublicLeadIntakeDoc": {
+      "title": "PublicLeadIntakeDoc",
+      "description": "Write-only cross-device storefront inquiry/estimator submission ingested by verified studio admin.",
+      "type": "object",
+      "properties": {
+        "referenceCode": { "type": "string", "minLength": 2, "maxLength": 32 },
+        "source": { "type": "string", "enum": ["simulator", "service-form"] },
+        "stage": { "type": "string", "enum": ["estimate", "lead"] },
+        "clientName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "clientEmail": { "type": "string", "maxLength": 180 },
+        "clientPhone": { "type": "string", "maxLength": 40 },
+        "eventTitle": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "eventDate": { "type": "string", "minLength": 4, "maxLength": 32 },
+        "venue": { "type": "string", "maxLength": 180 },
+        "palette": { "type": "string", "maxLength": 100 },
+        "estimatedTotalSGD": { "type": "number" },
+        "depositPaidSGD": { "type": "number" },
+        "stemCounts": { "type": "object" },
+        "lineItems": { "type": "array" },
+        "studioNotes": { "type": "string", "maxLength": 2000 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "referenceCode",
+        "source",
+        "stage",
+        "clientName",
+        "clientEmail",
+        "clientPhone",
+        "eventTitle",
+        "eventDate",
+        "venue",
+        "palette",
+        "estimatedTotalSGD",
+        "depositPaidSGD",
+        "stemCounts",
+        "lineItems",
+        "studioNotes",
+        "createdAt"
+      ]
+    },
+    "PublicOrderIntakeDoc": {
+      "title": "PublicOrderIntakeDoc",
+      "description": "Write-only cross-device storefront order submission ingested by verified studio admin.",
+      "type": "object",
+      "properties": {
+        "orderNumber": { "type": "string", "minLength": 2, "maxLength": 32 },
+        "currency": { "type": "string", "enum": ["SGD", "IDR", "USD"] },
+        "customerName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "customerPhone": { "type": "string", "maxLength": 40 },
+        "customerEmail": { "type": "string", "maxLength": 180 },
+        "recipientName": { "type": "string", "maxLength": 120 },
+        "deliveryAddress": { "type": "string", "maxLength": 300 },
+        "postalCode": { "type": "string", "maxLength": 20 },
+        "deliverySlot": { "type": "string", "maxLength": 60 },
+        "paymentMethod": { "type": "string", "enum": ["bank-transfer", "card", "whatsapp-concierge"] },
+        "items": { "type": "array" },
+        "subtotalSGD": { "type": "number" },
+        "deliveryFeeSGD": { "type": "number" },
+        "totalSGD": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "orderNumber",
+        "currency",
+        "customerName",
+        "customerPhone",
+        "customerEmail",
+        "recipientName",
+        "deliveryAddress",
+        "postalCode",
+        "deliverySlot",
+        "paymentMethod",
+        "items",
+        "subtotalSGD",
+        "deliveryFeeSGD",
+        "totalSGD",
+        "createdAt"
+      ]
+    },
+    "PublicProposalDoc": {
+      "title": "PublicProposalDoc",
+      "description": "Zero-PII shareable client proposal snapshot supporting capability-URL view and digital contract e-signature.",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "studioName": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "referenceCode": { "type": "string", "minLength": 2, "maxLength": 32 },
+        "clientFirstName": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "eventTitle": { "type": "string", "minLength": 1, "maxLength": 160 },
+        "eventDate": { "type": "string", "minLength": 4, "maxLength": 32 },
+        "venue": { "type": "string", "maxLength": 180 },
+        "palette": { "type": "string", "maxLength": 100 },
+        "estimatedTotalSGD": { "type": "number" },
+        "depositPaidSGD": { "type": "number" },
+        "stage": { "type": "string", "enum": ["estimate", "lead", "proposal-sent", "contract-signed", "booked"] },
+        "lineItems": { "type": "array" },
+        "contractSignedBy": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "contractSignedAt": { "type": "string", "minLength": 4, "maxLength": 40 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "ownerId",
+        "studioName",
+        "referenceCode",
+        "clientFirstName",
+        "eventTitle",
+        "eventDate",
+        "venue",
+        "palette",
+        "estimatedTotalSGD",
+        "depositPaidSGD",
+        "stage",
+        "lineItems",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserPublicProfile" },
+      "description": "Public studio user identity doc (non-PII)."
+    },
+    "/users/{userId}/private/{docId}": {
+      "schema": { "$ref": "#/entities/UserPrivateInfo" },
+      "description": "Private PII doc isolated to the owning authenticated user."
+    },
+    "/studios/{studioId}": {
+      "schema": { "$ref": "#/entities/StudioWorkspace" },
+      "description": "Studio workspace containing owner metadata and calculator draft."
+    },
+    "/studios/{studioId}/leads/{leadId}": {
+      "schema": { "$ref": "#/entities/CrmLeadDoc" },
+      "description": "CRM leads, proposals, and e-signed contracts belonging to the studio."
+    },
+    "/studios/{studioId}/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/CrmOrderDoc" },
+      "description": "Storefront orders associated with the studio."
+    },
+    "/publicLeads/{leadId}": {
+      "schema": { "$ref": "#/entities/PublicLeadIntakeDoc" },
+      "description": "Storefront public estimate & service inquiry queue readable only by verified studio admin."
+    },
+    "/publicOrders/{orderId}": {
+      "schema": { "$ref": "#/entities/PublicOrderIntakeDoc" },
+      "description": "Storefront public checkout queue readable only by verified studio admin."
+    },
+    "/publicProposals/{proposalId}": {
+      "schema": { "$ref": "#/entities/PublicProposalDoc" },
+      "description": "PII-free shareable proposal documents with capability-link get & client e-signature."
+    },
+    "/publicConfig/{configId}": {
+      "schema": { "$ref": "#/entities/PublishedCalculatorDoc" },
+      "description": "Published non-PII storefront price estimator settings."
+    }
+  }
+}

@@ -1,0 +1,448 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Core Identity & Validation Primitives
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(uid) {
+      return isVerifiedUser() && request.auth.uid == uid;
+    }
+
+    function isVerifiedAdminEmail() {
+      return isVerifiedUser() && request.auth.token.email == 'tryzic00@gmail.com';
+    }
+
+    function isAdmin() {
+      return isVerifiedUser() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == 'tryzic00@gmail.com'
+      );
+    }
+
+    function isStudioOwner(studioId) {
+      return isVerifiedUser() &&
+        exists(/databases/$(database)/documents/studios/$(studioId)) &&
+        get(/databases/$(database)/documents/studios/$(studioId)).data.ownerId == request.auth.uid;
+    }
+
+    // Entity Validation Blueprints
+    function isValidUserPublic(data) {
+      return data.keys().hasAll(['uid', 'displayName', 'role', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'displayName', 'role', 'createdAt', 'updatedAt'])
+        && isValidId(data.uid)
+        && data.uid == request.auth.uid
+        && data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 120
+        && data.role is string && data.role == 'florist'
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidUserPrivate(data) {
+      return data.keys().hasAll(['uid', 'email', 'studioName', 'updatedAt'])
+        && data.keys().hasOnly(['uid', 'email', 'studioName', 'updatedAt'])
+        && isValidId(data.uid)
+        && data.uid == request.auth.uid
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 180
+        && data.studioName is string && data.studioName.size() >= 1 && data.studioName.size() <= 120
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidStudio(data) {
+      return data.keys().hasAll(['ownerId', 'studioName', 'calculatorDraft', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['ownerId', 'studioName', 'calculatorDraft', 'createdAt', 'updatedAt'])
+        && isValidId(data.ownerId)
+        && data.ownerId == request.auth.uid
+        && data.studioName is string && data.studioName.size() >= 1 && data.studioName.size() <= 120
+        && data.calculatorDraft is map
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidLead(data) {
+      return data.keys().hasAll([
+          'ownerId', 'referenceCode', 'source', 'stage', 'clientName',
+          'clientEmail', 'clientPhone', 'eventTitle', 'eventDate', 'venue',
+          'palette', 'estimatedTotalSGD', 'depositPaidSGD', 'stemCounts',
+          'lineItems', 'studioNotes', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerId', 'referenceCode', 'source', 'stage', 'clientName',
+          'clientEmail', 'clientPhone', 'eventTitle', 'eventDate', 'venue',
+          'palette', 'estimatedTotalSGD', 'depositPaidSGD', 'stemCounts',
+          'lineItems', 'studioNotes', 'contractSignedBy', 'contractSignedAt',
+          'createdAt', 'updatedAt'
+        ])
+        && isValidId(data.ownerId)
+        && data.ownerId == request.auth.uid
+        && data.referenceCode is string && data.referenceCode.size() >= 2 && data.referenceCode.size() <= 32
+        && data.source in ['simulator', 'service-form', 'manual']
+        && data.stage in ['estimate', 'lead', 'proposal-sent', 'contract-signed', 'booked']
+        && data.clientName is string && data.clientName.size() >= 1 && data.clientName.size() <= 120
+        && data.clientEmail is string && data.clientEmail.size() <= 180
+        && data.clientPhone is string && data.clientPhone.size() <= 40
+        && data.eventTitle is string && data.eventTitle.size() >= 1 && data.eventTitle.size() <= 160
+        && data.eventDate is string && data.eventDate.size() >= 4 && data.eventDate.size() <= 32
+        && data.venue is string && data.venue.size() <= 180
+        && data.palette is string && data.palette.size() <= 100
+        && data.estimatedTotalSGD is number && data.estimatedTotalSGD >= 0
+        && data.depositPaidSGD is number && data.depositPaidSGD >= 0
+        && data.stemCounts is map
+        && data.lineItems is list && data.lineItems.size() <= 50
+        && (data.lineItems.size() == 0 || data.lineItems[0] is map)
+        && data.studioNotes is string && data.studioNotes.size() <= 2000
+        && (!('contractSignedBy' in data) || (data.contractSignedBy is string && data.contractSignedBy.size() <= 120))
+        && (!('contractSignedAt' in data) || (data.contractSignedAt is string && data.contractSignedAt.size() <= 40))
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidPublicLead(data) {
+      return data.keys().hasAll([
+          'referenceCode', 'source', 'stage', 'clientName',
+          'clientEmail', 'clientPhone', 'eventTitle', 'eventDate', 'venue',
+          'palette', 'estimatedTotalSGD', 'depositPaidSGD', 'stemCounts',
+          'lineItems', 'studioNotes', 'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'referenceCode', 'source', 'stage', 'clientName',
+          'clientEmail', 'clientPhone', 'eventTitle', 'eventDate', 'venue',
+          'palette', 'estimatedTotalSGD', 'depositPaidSGD', 'stemCounts',
+          'lineItems', 'studioNotes', 'createdAt'
+        ])
+        && data.referenceCode is string && data.referenceCode.size() >= 2 && data.referenceCode.size() <= 32
+        && data.source in ['simulator', 'service-form']
+        && data.stage in ['estimate', 'lead']
+        && data.clientName is string && data.clientName.size() >= 1 && data.clientName.size() <= 120
+        && data.clientEmail is string && data.clientEmail.size() <= 180
+        && data.clientPhone is string && data.clientPhone.size() <= 40
+        && data.eventTitle is string && data.eventTitle.size() >= 1 && data.eventTitle.size() <= 160
+        && data.eventDate is string && data.eventDate.size() >= 4 && data.eventDate.size() <= 32
+        && data.venue is string && data.venue.size() <= 180
+        && data.palette is string && data.palette.size() <= 100
+        && data.estimatedTotalSGD is number && data.estimatedTotalSGD >= 0
+        && data.depositPaidSGD is number && data.depositPaidSGD == 0
+        && data.stemCounts is map
+        && data.lineItems is list && data.lineItems.size() <= 50
+        && (data.lineItems.size() == 0 || data.lineItems[0] is map)
+        && data.studioNotes is string && data.studioNotes.size() <= 2000
+        && data.createdAt is timestamp;
+    }
+
+    function isValidOrder(data) {
+      return data.keys().hasAll([
+          'ownerId', 'orderNumber', 'currency', 'customerName', 'customerPhone',
+          'customerEmail', 'recipientName', 'deliveryAddress', 'postalCode',
+          'deliverySlot', 'paymentMethod', 'items', 'subtotalSGD',
+          'deliveryFeeSGD', 'totalSGD', 'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerId', 'orderNumber', 'currency', 'customerName', 'customerPhone',
+          'customerEmail', 'recipientName', 'deliveryAddress', 'postalCode',
+          'deliverySlot', 'paymentMethod', 'items', 'subtotalSGD',
+          'deliveryFeeSGD', 'totalSGD', 'createdAt'
+        ])
+        && isValidId(data.ownerId)
+        && data.ownerId == request.auth.uid
+        && data.orderNumber is string && data.orderNumber.size() >= 2 && data.orderNumber.size() <= 32
+        && data.currency in ['SGD', 'IDR', 'USD']
+        && data.customerName is string && data.customerName.size() >= 1 && data.customerName.size() <= 120
+        && data.customerPhone is string && data.customerPhone.size() <= 40
+        && data.customerEmail is string && data.customerEmail.size() <= 180
+        && data.recipientName is string && data.recipientName.size() <= 120
+        && data.deliveryAddress is string && data.deliveryAddress.size() <= 300
+        && data.postalCode is string && data.postalCode.size() <= 20
+        && data.deliverySlot is string && data.deliverySlot.size() <= 60
+        && data.paymentMethod in ['bank-transfer', 'card', 'whatsapp-concierge']
+        && data.items is list && data.items.size() <= 50
+        && (data.items.size() == 0 || data.items[0] is map)
+        && data.subtotalSGD is number && data.subtotalSGD >= 0
+        && data.deliveryFeeSGD is number && data.deliveryFeeSGD >= 0
+        && data.totalSGD is number && data.totalSGD >= 0
+        && data.createdAt is timestamp;
+    }
+
+    function isValidPublicOrder(data) {
+      return data.keys().hasAll([
+          'orderNumber', 'currency', 'customerName', 'customerPhone',
+          'customerEmail', 'recipientName', 'deliveryAddress', 'postalCode',
+          'deliverySlot', 'paymentMethod', 'items', 'subtotalSGD',
+          'deliveryFeeSGD', 'totalSGD', 'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'orderNumber', 'currency', 'customerName', 'customerPhone',
+          'customerEmail', 'recipientName', 'deliveryAddress', 'postalCode',
+          'deliverySlot', 'paymentMethod', 'items', 'subtotalSGD',
+          'deliveryFeeSGD', 'totalSGD', 'createdAt'
+        ])
+        && data.orderNumber is string && data.orderNumber.size() >= 2 && data.orderNumber.size() <= 32
+        && data.currency in ['SGD', 'IDR', 'USD']
+        && data.customerName is string && data.customerName.size() >= 1 && data.customerName.size() <= 120
+        && data.customerPhone is string && data.customerPhone.size() <= 40
+        && data.customerEmail is string && data.customerEmail.size() <= 180
+        && data.recipientName is string && data.recipientName.size() <= 120
+        && data.deliveryAddress is string && data.deliveryAddress.size() <= 300
+        && data.postalCode is string && data.postalCode.size() <= 20
+        && data.deliverySlot is string && data.deliverySlot.size() <= 60
+        && data.paymentMethod in ['bank-transfer', 'card', 'whatsapp-concierge']
+        && data.items is list && data.items.size() >= 1 && data.items.size() <= 50
+        && (data.items[0] is map)
+        && data.subtotalSGD is number && data.subtotalSGD >= 0
+        && data.deliveryFeeSGD is number && data.deliveryFeeSGD >= 0
+        && data.totalSGD is number && data.totalSGD >= 0
+        && data.createdAt is timestamp;
+    }
+
+    function isValidPublicConfig(data) {
+      return data.keys().hasAll(['ownerId', 'config', 'updatedAt'])
+        && data.keys().hasOnly(['ownerId', 'config', 'updatedAt'])
+        && isValidId(data.ownerId)
+        && data.ownerId == request.auth.uid
+        && data.config is map
+        && data.updatedAt is timestamp;
+    }
+
+    // Shareable Non-PII Client Proposal Snapshot (never stores email/phone/address)
+    function isValidPublicProposal(data) {
+      return data.keys().hasAll([
+          'ownerId', 'studioName', 'referenceCode', 'clientFirstName',
+          'eventTitle', 'eventDate', 'venue', 'palette',
+          'estimatedTotalSGD', 'depositPaidSGD', 'stage', 'lineItems',
+          'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'ownerId', 'studioName', 'referenceCode', 'clientFirstName',
+          'eventTitle', 'eventDate', 'venue', 'palette',
+          'estimatedTotalSGD', 'depositPaidSGD', 'stage', 'lineItems',
+          'contractSignedBy', 'contractSignedAt', 'createdAt', 'updatedAt'
+        ])
+        && isValidId(data.ownerId)
+        && data.studioName is string && data.studioName.size() >= 1 && data.studioName.size() <= 120
+        && data.referenceCode is string && data.referenceCode.size() >= 2 && data.referenceCode.size() <= 32
+        && data.clientFirstName is string && data.clientFirstName.size() >= 1 && data.clientFirstName.size() <= 80
+        && data.eventTitle is string && data.eventTitle.size() >= 1 && data.eventTitle.size() <= 160
+        && data.eventDate is string && data.eventDate.size() >= 4 && data.eventDate.size() <= 32
+        && data.venue is string && data.venue.size() <= 180
+        && data.palette is string && data.palette.size() <= 100
+        && data.estimatedTotalSGD is number && data.estimatedTotalSGD >= 0
+        && data.depositPaidSGD is number && data.depositPaidSGD >= 0
+        && data.stage in ['estimate', 'lead', 'proposal-sent', 'contract-signed', 'booked']
+        && data.lineItems is list && data.lineItems.size() <= 50
+        && (data.lineItems.size() == 0 || data.lineItems[0] is map)
+        && (!('contractSignedBy' in data) || (data.contractSignedBy is string && data.contractSignedBy.size() >= 1 && data.contractSignedBy.size() <= 120))
+        && (!('contractSignedAt' in data) || (data.contractSignedAt is string && data.contractSignedAt.size() >= 4 && data.contractSignedAt.size() <= 40))
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    // Admin Registry (read-only lookup for verified owner/admin checks)
+    match /admins/{adminUid} {
+      allow get: if isValidId(adminUid) && isOwner(adminUid);
+      allow list, write: if false;
+    }
+
+    // Users Public Profile + Isolated Private PII
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isAdmin());
+      allow list: if isSignedIn() && (existing().uid == request.auth.uid || isVerifiedAdminEmail());
+      allow create: if isValidId(userId)
+        && isOwner(userId)
+        && isValidUserPublic(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(userId)
+        && isValidUserPublic(incoming())
+        && (isOwner(userId) || isAdmin())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'updatedAt']);
+      allow delete: if false;
+
+      match /private/{docId} {
+        allow get: if isValidId(userId) && isValidId(docId) && (isOwner(userId) || isAdmin());
+        allow list: if isSignedIn() && existing().uid == request.auth.uid;
+        allow create: if isValidId(userId)
+          && isValidId(docId)
+          && isOwner(userId)
+          && isValidUserPrivate(incoming())
+          && incoming().updatedAt == request.time;
+        allow update: if isValidId(userId)
+          && isValidId(docId)
+          && isValidUserPrivate(incoming())
+          && (isOwner(userId) || isAdmin())
+          && incoming().uid == existing().uid
+          && incoming().updatedAt == request.time
+          && incoming().diff(existing()).affectedKeys().hasOnly(['email', 'studioName', 'updatedAt']);
+        allow delete: if false;
+      }
+    }
+
+    // Studio Workspaces & Subcollections (Master Gate)
+    match /studios/{studioId} {
+      allow get: if isValidId(studioId) && (isOwner(studioId) || isAdmin());
+      allow list: if isSignedIn() && (existing().ownerId == request.auth.uid || isVerifiedAdminEmail());
+      allow create: if isValidId(studioId)
+        && isOwner(studioId)
+        && isValidStudio(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(studioId)
+        && isValidStudio(incoming())
+        && (isOwner(studioId) || isAdmin())
+        && incoming().ownerId == existing().ownerId
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['studioName', 'calculatorDraft', 'updatedAt']);
+      allow delete: if false;
+
+      match /leads/{leadId} {
+        allow get: if isValidId(studioId) && isValidId(leadId) && (isStudioOwner(studioId) || isAdmin());
+        allow list: if isSignedIn() && (existing().ownerId == request.auth.uid || isVerifiedAdminEmail());
+        allow create: if isValidId(studioId)
+          && isValidId(leadId)
+          && isStudioOwner(studioId)
+          && isValidLead(incoming())
+          && incoming().createdAt == request.time
+          && incoming().updatedAt == request.time;
+        allow update: if isValidId(studioId)
+          && isValidId(leadId)
+          && isValidLead(incoming())
+          && (isStudioOwner(studioId) || isAdmin())
+          && (existing().stage != 'booked' || isAdmin())
+          && incoming().ownerId == existing().ownerId
+          && incoming().createdAt == existing().createdAt
+          && incoming().updatedAt == request.time
+          && (
+            isAdmin() ||
+            (incoming().diff(existing()).affectedKeys().hasOnly([
+              'stage', 'clientName', 'clientEmail', 'clientPhone', 'eventTitle',
+              'eventDate', 'venue', 'palette', 'estimatedTotalSGD', 'depositPaidSGD',
+              'stemCounts', 'lineItems', 'studioNotes', 'contractSignedBy',
+              'contractSignedAt', 'updatedAt'
+            ]))
+          );
+        allow delete: if isValidId(studioId)
+          && isValidId(leadId)
+          && (isStudioOwner(studioId) || isAdmin());
+      }
+
+      match /orders/{orderId} {
+        allow get: if isValidId(studioId) && isValidId(orderId) && (isStudioOwner(studioId) || isAdmin());
+        allow list: if isSignedIn() && (existing().ownerId == request.auth.uid || isVerifiedAdminEmail());
+        allow create: if isValidId(studioId)
+          && isValidId(orderId)
+          && isStudioOwner(studioId)
+          && isValidOrder(incoming())
+          && incoming().createdAt == request.time;
+        allow update: if false;
+        allow delete: if isValidId(studioId)
+          && isValidId(orderId)
+          && (isStudioOwner(studioId) || isAdmin());
+      }
+    }
+
+    // Cross-Device Storefront Public Intake Queue (Write-only from storefront; readable/deletable strictly by verified Admin)
+    match /publicLeads/{leadId} {
+      allow get: if isValidId(leadId) && isAdmin();
+      allow list: if isVerifiedAdminEmail();
+      allow create: if isValidId(leadId)
+        && isValidPublicLead(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if false;
+      allow delete: if isValidId(leadId) && isAdmin();
+    }
+
+    match /publicOrders/{orderId} {
+      allow get: if isValidId(orderId) && isAdmin();
+      allow list: if isVerifiedAdminEmail();
+      allow create: if isValidId(orderId)
+        && isValidPublicOrder(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if false;
+      allow delete: if isValidId(orderId) && isAdmin();
+    }
+
+    // Shareable Non-PII Client Proposals & Digital E-Sign Action
+    match /publicProposals/{proposalId} {
+      allow get: if isValidId(proposalId);
+      allow list: if false;
+      allow create: if isValidId(proposalId)
+        && isVerifiedUser()
+        && isValidPublicProposal(incoming())
+        && incoming().ownerId == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(proposalId)
+        && isValidPublicProposal(incoming())
+        && incoming().ownerId == existing().ownerId
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          isAdmin() ||
+          (isVerifiedUser() && existing().ownerId == request.auth.uid && incoming().diff(existing()).affectedKeys().hasOnly([
+            'studioName', 'referenceCode', 'clientFirstName', 'eventTitle', 'eventDate',
+            'venue', 'palette', 'estimatedTotalSGD', 'depositPaidSGD', 'stage',
+            'lineItems', 'contractSignedBy', 'contractSignedAt', 'updatedAt'
+          ])) ||
+          (
+            existing().stage != 'booked' &&
+            existing().stage != 'contract-signed' &&
+            incoming().stage == 'contract-signed' &&
+            ('contractSignedBy' in incoming()) &&
+            ('contractSignedAt' in incoming()) &&
+            incoming().contractSignedBy.size() >= 2 &&
+            incoming().diff(existing()).affectedKeys().hasOnly([
+              'stage', 'contractSignedBy', 'contractSignedAt', 'updatedAt'
+            ])
+          )
+        );
+      allow delete: if isValidId(proposalId)
+        && (isAdmin() || (isVerifiedUser() && existing().ownerId == request.auth.uid));
+    }
+
+    // Public Non-PII Published Calculator Configuration
+    match /publicConfig/{configId} {
+      allow get: if isValidId(configId) && configId == 'published_calculator';
+      allow list: if false;
+      allow create: if isValidId(configId)
+        && configId == 'published_calculator'
+        && isVerifiedUser()
+        && isValidPublicConfig(incoming())
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(configId)
+        && configId == 'published_calculator'
+        && isValidPublicConfig(incoming())
+        && isVerifiedUser()
+        && (existing().ownerId == request.auth.uid || isAdmin())
+        && incoming().ownerId == existing().ownerId
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['config', 'updatedAt']);
+      allow delete: if false;
+    }
+  }
+}

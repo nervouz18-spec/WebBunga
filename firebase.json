@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/firebase/firebase-tools/master/schema/firebase-config.json",
+  "firestore": [
+    {
+      "database": "ai-studio-bloombotanica-b255db26-75f9-4ae8-81b6-da921bd4271d",
+      "rules": "firestore.rules"
+    }
+  ]
+}

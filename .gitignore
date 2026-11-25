@@ -1,0 +1,12 @@
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example
+
+# AI Studio scratch/generated artifacts (not used by the app)
+.aistudio/
+public/assets/aistudio/
