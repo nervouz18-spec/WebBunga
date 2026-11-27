@@ -67,6 +67,9 @@ export const copy: Record<
       kicker: string;
       heading: string;
       subheading: string;
+      weddingModeLabel: string;
+      stemModeLabel: string;
+      weddingHint: string;
       step1Title: string;
       step2Title: string;
       step3Title: string;
@@ -259,7 +262,7 @@ export const copy: Record<
       },
     },
     hero: {
-      kicker: 'Floral Storefront & Studio CRM Platform',
+      kicker: 'Floral Storefront',
       headline: 'From instant client estimates to signed floral proposals—in one calm studio.',
       subcopy:
         'Clients browse seasonal collections or build their own stem estimate using our live simulator. Every estimate and enquiry flows straight into your Florist CRM pipeline.',
@@ -306,9 +309,13 @@ export const copy: Record<
     },
     simulator: {
       kicker: 'Pre-Inquiry Floral Estimator',
-      heading: 'Custom Arrangement & Price Simulator',
+      heading: 'Wedding Floral Estimator & Custom Stem Builder',
       subheading:
-        'Build a floral arrangement from scratch. Select your vessel, pick stems, and either add directly to bag or send your estimate into our Studio CRM for a formal visual proposal.',
+        'Plan the full floral story—corsages, bridesmaid bouquets, table centrepieces, altar arrangements and more—with honest ranges before your quotation. Prefer a single arrangement? Build your own stem estimate below.',
+      weddingModeLabel: 'Wedding Floral Estimator',
+      stemModeLabel: 'Custom Stem Builder',
+      weddingHint:
+        'Corsages, bridesmaid blooms, table pieces and altar florals—add everything you need in one estimate.',
       step1Title: '01. Select Vessel & Format',
       step2Title: '02. Choose Your Blooms & Stems',
       step3Title: '03. Palette, Wrapping & Add-Ons',
@@ -528,7 +535,7 @@ export const copy: Record<
       },
     },
     hero: {
-      kicker: 'Storefront Bunga & Studio CRM Terpadu',
+      kicker: 'Storefront Bunga',
       headline: 'Dari estimasi harga instan hingga kontrak proposal—dalam satu studio.',
       subcopy:
         'Pelanggan dapat memilih koleksi siap kirim atau menyusun estimasi tangkai bunga sendiri di Simulasi Harga. Setiap estimasi dan permintaan acara otomatis masuk ke pipeline Studio CRM Anda.',
@@ -575,9 +582,13 @@ export const copy: Record<
     },
     simulator: {
       kicker: 'Kalkulator Estimasi Pra-Order',
-      heading: 'Simulasi Harga & Rangkai Bunga Sendiri',
+      heading: 'Simulator Bunga Wedding & Rangkai Tangkai',
       subheading:
-        'Rancang komposisi bunga sesuai selera Anda. Pilih bentuk wadah, tentukan jumlah tiap tangkai bunga, lalu masukkan ke tas atau kirim langsung ke Studio CRM sebagai permintaan proposal resmi.',
+        'Rencanakan seluruh kebutuhan bunga wedding—korsase, buket bridesmaid, bunga meja, dekorasi altar, dan lainnya—dengan kisaran harga transparan sebelum quotation. Ingin rangkaian satuan? Susun estimasi tangkai di bawah.',
+      weddingModeLabel: 'Estimasi Bunga Wedding',
+      stemModeLabel: 'Rangkai Per Tangkai',
+      weddingHint:
+        'Korsase, bunga bridesmaid, bunga meja, dan rangkaian altar—semuanya bisa dihitung dalam satu estimasi.',
       step1Title: '01. Pilih Wadah & Bentuk Rangkaian',
       step2Title: '02. Pilih Bunga & Jumlah Tangkai',
       step3Title: '03. Palet Warna, Pita & Tambahan',

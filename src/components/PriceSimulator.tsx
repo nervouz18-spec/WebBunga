@@ -73,6 +73,25 @@ const PRESETS: Record<
   },
 };
 
+// Nama piece & grup bawaan dari Studio CRM diterjemahkan untuk tampilan tamu Indonesia.
+// ID baru yang ditambahkan studio tetap memakai nama aslinya.
+const WEDDING_PIECE_LABELS_ID: Record<string, string> = {
+  'piece-bridal-bouquet': 'Buket Pengantin',
+  'piece-bridesmaid': 'Buket Bridesmaid',
+  'piece-boutonniere': 'Bunga Jas (Boutonniere)',
+  'piece-corsage': 'Korsase Pengantin Pria',
+  'piece-ceremony-arch': 'Dekorasi Altar / Arch',
+  'piece-aisle-meadow': 'Bunga Lorong (Aisle)',
+  'piece-centerpiece': 'Bunga Meja (Centerpiece)',
+  'piece-bud-vase-trio': 'Bud Vase Meja (3)',
+};
+
+const WEDDING_GROUP_LABELS_ID: Record<string, string> = {
+  'PERSONAL FLOWERS': 'BUNGA PRIBADI',
+  CEREMONY: 'UPACARA / ALTAR',
+  RECEPTION: 'RESEPSI / MEJA',
+};
+
 function getTomorrow(): string {
   const d = new Date();
   d.setDate(d.getDate() + 1);
@@ -99,20 +118,25 @@ function formatPublishedMoney(
   return cfg.symbolPosition === 'before' ? `${sym}${numStr}` : `${numStr} ${sym}`;
 }
 
-function formatPieceUnit(piece: CalculatorPiece, cfg: CalculatorConfig): string {
+function formatPieceUnit(
+  piece: CalculatorPiece,
+  cfg: CalculatorConfig,
+  language: Language
+): string {
   if (cfg.neverShowEach && (!piece.pricingUnit || piece.pricingUnit === 'each')) {
     return '';
   }
+  const id = language === 'id';
   switch (piece.pricingUnit) {
     case 'counted':
-      return ' counted';
+      return id ? ' / unit' : ' counted';
     case 'per-guest':
-      return ' / guest';
+      return id ? ' / tamu' : ' / guest';
     case 'per-foot':
       return ' / ft';
     case 'each':
     default:
-      return cfg.neverShowEach ? '' : ' each';
+      return cfg.neverShowEach ? '' : id ? ' / pcs' : ' each';
   }
 }
 
@@ -127,7 +151,12 @@ export function PriceSimulator({
   const t = copy[language].simulator;
   const theme = publishedCalculator.brandTheme;
 
-  const [builderMode, setBuilderMode] = useState<'stems' | 'event-pieces'>('stems');
+  const localizedPieceName = (piece: CalculatorPiece) =>
+    language === 'id' ? WEDDING_PIECE_LABELS_ID[piece.id] || piece.name : piece.name;
+  const localizedGroupName = (label: string) =>
+    language === 'id' ? WEDDING_GROUP_LABELS_ID[label] || label : label;
+
+  const [builderMode, setBuilderMode] = useState<'stems' | 'event-pieces'>('event-pieces');
   const [syncEstimatorCurrency, setSyncEstimatorCurrency] = useState(true);
   const useStorefrontCurrency =
     syncEstimatorCurrency ||
@@ -302,7 +331,7 @@ export function PriceSimulator({
       '',
       ...piecesEstimate.rows.map(
         (r) =>
-          `- ${r.qty}x ${r.name}: ${
+          `- ${r.qty}x ${localizedPieceName(r)}: ${
             r.rowMin === r.rowMax ? fmt(r.rowMin) : `${fmt(r.rowMin)} – ${fmt(r.rowMax)}`
           }`
       ),
@@ -420,8 +449,8 @@ export function PriceSimulator({
         lineItems: [
           ...piecesEstimate.rows.map((r) => ({
             id: `li-ep-${r.id}-${Date.now()}`,
-            title: r.name,
-            description: `${r.groupLabel} (${formatPublishedMoney(r.minPrice, publishedCalculator, currency, useStorefrontCurrency)} – ${formatPublishedMoney(r.maxPrice, publishedCalculator, currency, useStorefrontCurrency)})`,
+            title: localizedPieceName(r),
+            description: `${localizedGroupName(r.groupLabel)} (${formatPublishedMoney(r.minPrice, publishedCalculator, currency, useStorefrontCurrency)} – ${formatPublishedMoney(r.maxPrice, publishedCalculator, currency, useStorefrontCurrency)})`,
             quantity: r.qty,
             unitPriceSGD: Math.round((r.minPrice + r.maxPrice) / 2),
           })),
@@ -532,17 +561,6 @@ export function PriceSimulator({
           <div className="grid grid-cols-1 gap-1 p-1 bg-[#EAE6DF] rounded-sm w-full sm:inline-flex sm:w-fit sm:shrink-0">
             <button
               type="button"
-              onClick={() => setBuilderMode('stems')}
-              className={`px-4 py-2.5 sm:py-2 text-xs font-medium rounded-sm transition-colors cursor-pointer ${
-                builderMode === 'stems'
-                  ? 'bg-white text-[#A35047] shadow-xs'
-                  : 'text-[#5C615D] hover:text-[#1C211E]'
-              }`}
-            >
-              {language === 'en' ? 'Custom Stem Builder' : 'Rangkai Per Tangkai'}
-            </button>
-            <button
-              type="button"
               onClick={() => setBuilderMode('event-pieces')}
               className={`px-4 py-2.5 sm:py-2 text-xs font-medium rounded-sm transition-colors cursor-pointer ${
                 builderMode === 'event-pieces'
@@ -550,7 +568,18 @@ export function PriceSimulator({
                   : 'text-[#5C615D] hover:text-[#1C211E]'
               }`}
             >
-              {language === 'en' ? 'Event & Wedding Estimator' : 'Estimasi Acara & Wedding'}
+              {t.weddingModeLabel}
+            </button>
+            <button
+              type="button"
+              onClick={() => setBuilderMode('stems')}
+              className={`px-4 py-2.5 sm:py-2 text-xs font-medium rounded-sm transition-colors cursor-pointer ${
+                builderMode === 'stems'
+                  ? 'bg-white text-[#A35047] shadow-xs'
+                  : 'text-[#5C615D] hover:text-[#1C211E]'
+              }`}
+            >
+              {t.stemModeLabel}
             </button>
           </div>
         </div>
@@ -603,11 +632,18 @@ export function PriceSimulator({
               >
                 {publishedCalculator.introSentence}
               </p>
+              <p
+                className="text-xs max-w-xl mx-auto leading-relaxed"
+                style={{ color: theme.estimateAccentColor }}
+              >
+                {t.weddingHint}
+              </p>
             </div>
 
             {groupedPieces.map((grp) => {
               const sectionNote = publishedCalculator.sectionNotes?.[grp.label];
               const isRentalGroup = publishedCalculator.rentalSections?.includes(grp.label);
+              const groupLabel = localizedGroupName(grp.label);
               return (
                 <div key={grp.label} className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
@@ -615,7 +651,7 @@ export function PriceSimulator({
                       className="text-[11px] tracking-[0.14em] uppercase"
                       style={{ color: theme.smallPrintColor }}
                     >
-                      {grp.label}
+                      {groupLabel}
                     </div>
                     {isRentalGroup && (
                       <span
@@ -638,7 +674,12 @@ export function PriceSimulator({
                   >
                     {grp.items.map((piece) => {
                       const qty = pieceCounts[piece.id] || 0;
-                      const unitSuffix = formatPieceUnit(piece, publishedCalculator);
+                      const unitSuffix = formatPieceUnit(
+                        piece,
+                        publishedCalculator,
+                        language
+                      );
+                      const pieceName = localizedPieceName(piece);
                       const priceText =
                         piece.minPrice === piece.maxPrice
                           ? `${formatPublishedMoney(piece.minPrice, publishedCalculator, currency, useStorefrontCurrency)}${unitSuffix}`
@@ -654,7 +695,7 @@ export function PriceSimulator({
                               className="text-xl"
                               style={{ fontFamily: theme.headingFont, color: theme.textColor }}
                             >
-                              {piece.name}
+                              {pieceName}
                             </div>
                             <div
                               className="text-xs tabular-nums"
